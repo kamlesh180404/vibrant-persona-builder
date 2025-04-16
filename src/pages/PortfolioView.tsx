@@ -1,8 +1,7 @@
-
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Github, Globe, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import { ArrowLeft, Github, Globe, Linkedin, Mail, MapPin, Phone, Twitter, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Loader } from "@/components/ui/loader";
 import { usePortfolioStore } from "@/store/portfolioStore";
 import { SectionType } from "@/types";
+import { generatePDF } from '@/utils/pdfGenerator';
 
 const PortfolioView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -39,7 +39,12 @@ const PortfolioView = () => {
     visible: { y: 0, opacity: 1 },
   };
 
-  // Render functions for different section types
+  const handleDownloadPDF = async () => {
+    if (currentPortfolio) {
+      await generatePDF(currentPortfolio);
+    }
+  };
+
   const renderSection = (section: any) => {
     switch (section.type) {
       case SectionType.ABOUT:
@@ -139,7 +144,6 @@ const PortfolioView = () => {
   );
 
   const renderSkillsSection = (section: any) => {
-    // Group skills by category
     const skillsByCategory = section.content.reduce((groups: any, skill: any) => {
       const category = skill.category || 'Other';
       if (!groups[category]) {
@@ -291,7 +295,6 @@ const PortfolioView = () => {
     );
   };
 
-  // Helper to get the appropriate social icon
   const getSocialIcon = (platform: string) => {
     const lowerPlatform = platform.toLowerCase();
     if (lowerPlatform.includes('github')) return Github;
@@ -336,10 +339,16 @@ const PortfolioView = () => {
         {/* Portfolio Header */}
         <section className="bg-gradient-to-br from-portfolio-blue-600 to-portfolio-blue-900 text-white py-16">
           <div className="container">
-            <Button variant="ghost" className="text-white mb-6" onClick={() => navigate(-1)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
+            <div className="flex items-center justify-between mb-6">
+              <Button variant="ghost" className="text-white" onClick={() => navigate(-1)}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button variant="outline" className="text-white" onClick={handleDownloadPDF}>
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+            </div>
             
             <div className="text-center max-w-3xl mx-auto">
               <motion.h1 
@@ -363,26 +372,28 @@ const PortfolioView = () => {
           </div>
         </section>
         
-        {/* Portfolio Content */}
-        <section className="py-12">
-          <div className="container">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-12"
-            >
-              {currentPortfolio.sections
-                .sort((a, b) => a.order - b.order)
-                .map((section) => (
-                  <motion.div key={section.id} variants={itemVariants}>
-                    {renderSection(section)}
-                    <Separator className="mt-12" />
-                  </motion.div>
-                ))}
-            </motion.div>
-          </div>
-        </section>
+        <div id="portfolio-content">
+          {/* Portfolio Content */}
+          <section className="py-12">
+            <div className="container">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-12"
+              >
+                {currentPortfolio.sections
+                  .sort((a, b) => a.order - b.order)
+                  .map((section) => (
+                    <motion.div key={section.id} variants={itemVariants}>
+                      {renderSection(section)}
+                      <Separator className="mt-12" />
+                    </motion.div>
+                  ))}
+              </motion.div>
+            </div>
+          </section>
+        </div>
       </main>
       
       <Footer />

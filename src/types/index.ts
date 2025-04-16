@@ -1,4 +1,3 @@
-
 // User related types
 export interface User {
   id: string;
@@ -111,4 +110,10 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface JobDescription {
+  title: string;
+  description: string;
+  keywords: string[];
 }
